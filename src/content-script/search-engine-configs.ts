@@ -10,7 +10,7 @@ export const config: Record<string, SearchEngine> = {
   whatsapp: {
     inputQuery: ['form textarea'],
     bodyQuery: ['form textarea'],
-    sidebarContainerQuery: ['#rhs'],
-    appendContainerQuery: ['#rcnt'],
+    sidebarContainerQuery: ['#pane-side'],
+    appendContainerQuery: ['#hard_expire_time'],
   },
 }

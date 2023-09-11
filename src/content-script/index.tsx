@@ -8,6 +8,37 @@ import ChatGPTContainer from './ChatGPTContainer'
 import { config, SearchEngine } from './search-engine-configs'
 import './styles.scss'
 import { getPossibleElementByQuerySelector } from './utils'
+const isPrime = function (n) {
+  if (typeof n !== 'number' || n <= 1 || n % 1 !== 0) {
+    return false
+  }
+  for (let i = 2; i <= Math.sqrt(n); i += 1) {
+    if (n % i === 0) {
+      return false
+    }
+  }
+  return true
+}
+
+function waitForElm(selector) {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector))
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        observer.disconnect()
+        resolve(document.querySelector(selector))
+      }
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+  })
+}
 
 async function mount(question: string, promptSource: string, siteConfig: SearchEngine) {
   const container = document.createElement('div')
@@ -115,6 +146,22 @@ async function run() {
 
 run()
 
+console.log('siteConfig', siteConfig)
+
 if (siteConfig.watchRouteChange) {
   siteConfig.watchRouteChange(run)
 }
+
+waitForElm(siteConfig.sidebarContainerQuery[0]).then((elm) => {
+  console.log(siteConfig.sidebarContainerQuery[0], 'Element is ready')
+  console.log('elm', elm)
+  const chatlist = elm.querySelectorAll('[aria-label="Chat list"]')
+  console.log('chatlist', chatlist)
+  chatlist[0].childNodes.forEach(async function (chele, i) {
+    console.log('%d: %s', i, chele.innerText)
+    const buttonItem = document.createElement('button')
+    buttonItem.className = `button-${i}`
+    buttonItem.innerText = `Button${i}`
+    chele?.appendChild(buttonItem)
+  })
+})
