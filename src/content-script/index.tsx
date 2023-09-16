@@ -1,8 +1,9 @@
 import { render } from 'preact'
-import Switcher10 from '~/content-script/components/switcher10'
+import NavBar from '~/content-script/components/NavBar'
+import Switcher10 from '~/content-script/components/Switcher10'
 import '../base.css'
-import { config } from './search-engine-configs'
 import './styles.scss'
+import { config } from './website-configs'
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
@@ -33,6 +34,10 @@ async function mountEnableButton(container: object, containerid: string) {
   )
 }
 
+async function mountNavBar(container: object) {
+  render(<NavBar />, container)
+}
+
 const siteRegex = new RegExp(Object.keys(config).join('|'))
 let siteName
 try {
@@ -60,4 +65,11 @@ waitForElm(siteConfig.sidebarContainerQuery[0]).then((elm) => {
     console.log(i, datespan)
     if (datespan) mountEnableButton(datespan, i + 1)
   })
+})
+
+waitForElm(siteConfig.inputQuery[0]).then((elm) => {
+  console.log(siteConfig.inputQuery[0], 'Element is ready')
+  console.log('elm', elm)
+  const grandParentElm = elm.parentNode?.parentNode //?.parentNode;
+  mountNavBar(grandParentElm)
 })

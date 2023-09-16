@@ -1,6 +1,5 @@
 export interface SearchEngine {
   inputQuery: string[]
-  bodyQuery: string[]
   sidebarContainerQuery: string[]
   appendContainerQuery: string[]
   watchRouteChange?: (callback: () => void) => void
@@ -8,8 +7,8 @@ export interface SearchEngine {
 
 export const config: Record<string, SearchEngine> = {
   whatsapp: {
-    inputQuery: ['form textarea'],
-    bodyQuery: ['form textarea'],
+    inputQuery: ['#app div.os-mac div div header'],
+    // #app > div > div > div._2Ts6i._3RGKj > header > div._3WByx > div
     sidebarContainerQuery: ['#pane-side'],
     appendContainerQuery: ['#hard_expire_time'],
   },

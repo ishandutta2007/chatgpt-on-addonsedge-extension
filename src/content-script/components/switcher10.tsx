@@ -7,15 +7,15 @@ interface Props {
 }
 
 export enum SmallButtonSize {
-  Slider = 'h-[13px] w-[34px]',
-  Dot = 'h-[10px] w-[10px]',
-  Text = 'text-xs',
+  slider = 'h-[13px] w-[34px]',
+  dot = 'h-[10px] w-[10px]',
+  text = 'text-xs',
 }
 
 export enum MediumButtonSize {
-  Slider = 'h-[26px] w-[50px]',
-  Dot = 'h-[18px] w-[18px]',
-  Text = 'text-sm',
+  slider = 'h-[26px] w-[50px]',
+  dot = 'h-[18px] w-[18px]',
+  text = 'text-sm',
 }
 
 const Switcher10 = (props: Props) => {
@@ -43,18 +43,18 @@ const Switcher10 = (props: Props) => {
         />
         <span
           className={`slider mr-3 flex ${
-            buttonSize.Slider
+            buttonSize.slider
           } items-center rounded-full p-1 duration-200 ${
             isChecked ? 'bg-indigo-500' : 'bg-[#CCCCCE]'
           }`}
         >
           <span
-            className={`dot ${buttonSize.Dot} rounded-full bg-white duration-200 ${
+            className={`dot ${buttonSize.dot} rounded-full bg-white duration-200 ${
               isChecked ? 'translate-x-6' : ''
             }`}
           ></span>
         </span>
-        <span className={`label flex items-center ${buttonSize.Text} font-medium text-black`}>
+        <span className={`label flex items-center ${buttonSize.text} font-medium text-black`}>
           {props.displayText} <span className="pl-1"> {isChecked ? 'On' : 'Off'} </span>
         </span>
       </label>
