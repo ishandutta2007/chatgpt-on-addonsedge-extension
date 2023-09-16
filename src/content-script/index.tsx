@@ -1,24 +1,8 @@
 import { render } from 'preact'
-import { ToastContainer } from 'react-toastify'
+import Switcher10 from '~/content-script/components/switcher10'
 import '../base.css'
-import { getUserConfig, Theme } from '../config'
-import { detectSystemColorScheme } from '../utils'
-import { followupQuestionsPrompt } from '../utils/prompt'
-import ChatGPTContainer from './ChatGPTContainer'
-import { config, SearchEngine } from './search-engine-configs'
+import { config } from './search-engine-configs'
 import './styles.scss'
-import { getPossibleElementByQuerySelector } from './utils'
-const isPrime = function (n) {
-  if (typeof n !== 'number' || n <= 1 || n % 1 !== 0) {
-    return false
-  }
-  for (let i = 2; i <= Math.sqrt(n); i += 1) {
-    if (n % i === 0) {
-      return false
-    }
-  }
-  return true
-}
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
@@ -40,73 +24,13 @@ function waitForElm(selector) {
   })
 }
 
-async function mount(question: string, promptSource: string, siteConfig: SearchEngine) {
-  const container = document.createElement('div')
+async function mountEnableButton(container: object, containerid: string) {
   container.className = 'chat-gpt-container'
-
-  const userConfig = await getUserConfig()
-  let theme: Theme
-  if (userConfig.theme === Theme.Auto) {
-    theme = detectSystemColorScheme()
-  } else {
-    theme = userConfig.theme
-  }
-  if (theme === Theme.Dark) {
-    container.classList.add('gpt-dark')
-  } else {
-    container.classList.add('gpt-light')
-  }
-
-  const siderbarContainer = getPossibleElementByQuerySelector(siteConfig.sidebarContainerQuery)
-  if (siderbarContainer) {
-    siderbarContainer.prepend(container)
-  } else {
-    container.classList.add('sidebar-free')
-    const appendContainer = getPossibleElementByQuerySelector(siteConfig.appendContainerQuery)
-    if (appendContainer) {
-      appendContainer.appendChild(container)
-    }
-  }
-
+  // #pane-side > div:nth-child(1) > div > div > div:nth-child(11) > div > div > div > div._8nE1Y > div.y_sn4 > div.Dvjym > span
   render(
-    <div>
-      <ChatGPTContainer
-        question={question}
-        promptSource={promptSource}
-        triggerMode={userConfig.triggerMode || 'always'}
-      />
-      <ToastContainer />
-    </div>,
+    <Switcher10 buttonId={containerid} buttonSize="small" displayText="AutoReply" />,
     container,
   )
-}
-
-/**
- * mount html elements when requestions triggered
- * @param question question string
- * @param index question index
- */
-export async function requeryMount(question: string, index: number) {
-  const container = document.querySelector<HTMLDivElement>('.question-container')
-  let theme: Theme
-  const questionItem = document.createElement('div')
-  questionItem.className = `question-${index}`
-
-  const userConfig = await getUserConfig()
-  if (userConfig.theme === Theme.Auto) {
-    theme = detectSystemColorScheme()
-  } else {
-    theme = userConfig.theme
-  }
-  if (theme === Theme.Dark) {
-    container?.classList.add('gpt-dark')
-    questionItem.classList.add('gpt-dark')
-  } else {
-    container?.classList.add('gpt-light')
-    questionItem.classList.add('gpt-light')
-  }
-  questionItem.innerText = `Q${index + 1} : ${question}`
-  container?.appendChild(questionItem)
 }
 
 const siteRegex = new RegExp(Object.keys(config).join('|'))
@@ -117,34 +41,6 @@ try {
   siteName = location.pathname.match(siteRegex)![0]
 }
 const siteConfig = config[siteName]
-
-async function run() {
-  const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>(siteConfig.inputQuery)
-  console.debug('Try to Mount chat-gpt-container on', siteName)
-
-  if (siteConfig.bodyQuery) {
-    const bodyElement = getPossibleElementByQuerySelector(siteConfig.bodyQuery)
-    console.debug('bodyElement', bodyElement)
-
-    if (bodyElement && bodyElement.textContent) {
-      const bodyInnerText = bodyElement.textContent.trim().replace(/\s+/g, ' ').substring(0, 1500)
-      console.log('Body: ' + bodyInnerText)
-      const userConfig = await getUserConfig()
-
-      const found = userConfig.promptOverrides.find(
-        (override) => new URL(override.site).hostname === location.hostname,
-      )
-      const question = found?.prompt ?? userConfig.prompt
-      const promptSource = found?.site ?? 'default'
-
-      const final_prompt = question + bodyInnerText + '. ' + followupQuestionsPrompt(bodyInnerText)
-      console.log('final prompt:', final_prompt) // question + bodyInnerText)
-      mount(final_prompt, promptSource, siteConfig)
-    }
-  }
-}
-
-run()
 
 console.log('siteConfig', siteConfig)
 
@@ -159,9 +55,9 @@ waitForElm(siteConfig.sidebarContainerQuery[0]).then((elm) => {
   console.log('chatlist', chatlist)
   chatlist[0].childNodes.forEach(async function (chele, i) {
     console.log('%d: %s', i, chele.innerText)
-    const buttonItem = document.createElement('button')
-    buttonItem.className = `button-${i}`
-    buttonItem.innerText = `Button${i}`
-    chele?.appendChild(buttonItem)
+    // const datespan = chele.querySelectorAll('div > div > div > div._8nE1Y > div.y_sn4 > div.Dvjym > span')
+    const datespan = chele.querySelector('div span.aprpv14t')
+    console.log(i, datespan)
+    if (datespan) mountEnableButton(datespan, i + 1)
   })
 })
