@@ -10,7 +10,7 @@
     "48": "logo.png",
     "128": "logo.png"
   },
-  "host_permissions": ["https://*.openai.com/", "https://*.web.whatsapp.com/"],
+  "host_permissions": ["https://*.openai.com/", "https://*.addons.opera.com/"],
   "permissions": ["storage"],
   "background": {
     "service_worker": "background.js"
@@ -25,8 +25,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://web.whatsapp.com/*",
-        "https://*.web.whatsapp.com/*"
+        "https://addons.opera.com/*",
+        "https://*.addons.opera.com/*"
       ],
       "js": ["content-script.js"],
       "css": ["content-script.css"]

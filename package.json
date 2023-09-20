@@ -1,8 +1,8 @@
 {
-  "name": "chatgpt-on-whatsapp-extension",
+  "name": "chatgpt-on-addonsopera-extension",
   "author": "ishandutta2007",
   "license": "ISC",
-  "repository": "https://github.com/SingularityLabs-ai/chatgpt-on-whatsapp-extension",
+  "repository": "https://github.com/SingularityLabs-ai/chatgpt-on-addonsopera-extension",
   "scripts": {
     "build": "node build.mjs",
     "lint": "eslint --ext .js,.mjs,.jsx .",
@@ -16,6 +16,7 @@
     "@primer/octicons-react": "^17.9.0",
     "@react-hooks-library/core": "^0.5.1",
     "@ungap/structured-clone": "^1.2.0",
+    "classnames": "^2.3.2",
     "dayjs": "^1.11.9",
     "eventsource-parser": "^0.0.5",
     "expiry-map": "^2.0.0",
