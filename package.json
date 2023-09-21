@@ -1,8 +1,8 @@
 {
-  "name": "chatgpt-on-addonsopera-extension",
+  "name": "chatgpt-on-addonsedge-extension",
   "author": "ishandutta2007",
   "license": "ISC",
-  "repository": "https://github.com/SingularityLabs-ai/chatgpt-on-addonsopera-extension",
+  "repository": "https://github.com/SingularityLabs-ai/chatgpt-on-addonsedge-extension",
   "scripts": {
     "build": "node build.mjs",
     "lint": "eslint --ext .js,.mjs,.jsx .",

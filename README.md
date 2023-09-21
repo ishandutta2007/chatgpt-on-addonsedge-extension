@@ -1,4 +1,4 @@
-# AddonsoperaGPT
+# AddonsedgeGPT
 
 [link-chrome]: https://chrome.web.google.com/webstore/detail/whatsappgpt-chatgpt-on-goog/pabeminldebomngnkgffiejipjjaaogi?hl=en&authuser=0 'Chrome Web Store'
 
@@ -16,9 +16,9 @@
 
 Disable "Prevent sites from fingerprinting me based on my language preferences" in `brave://settings/shields`
 
-### How to make it work in Opera
+### How to make it work in Edge
 
-![Screenshot](screenshots/opera.png?raw=true)
+![Screenshot](screenshots/edge.png?raw=true)
 
 Enable "Allow access to search page results" in the extension management page
 

@@ -2,7 +2,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "0.0.7",
+  "version": "0.0.1",
   "manifest_version": 2,
   "icons": {
     "16": "logo.png",
@@ -10,7 +10,7 @@
     "48": "logo.png",
     "128": "logo.png"
   },
-  "permissions": ["storage", "https://*.openai.com/", "https://*.addons.opera.com/"],
+  "permissions": ["storage", "https://*.openai.com/", "https://*.addons.edge.com/"],
   "background": {
     "scripts": ["background.js"]
   },
@@ -24,8 +24,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://addons.opera.com/*",
-        "https://*.addons.opera.com/*"
+        "https://addons.edge.com/*",
+        "https://*.addons.edge.com/*"
       ],
       "js": ["content-script.js"],
       "css": ["content-script.css"]

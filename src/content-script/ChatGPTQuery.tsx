@@ -215,7 +215,7 @@ function ChatGPTQuery(props: Props) {
     return (
       <div className="markdown-body gpt-markdown" id="gpt-answer" dir="auto">
         <div className="gpt-header">
-          <span className="font-bold">AddonsoperaGPT</span>
+          <span className="font-bold">AddonsedgeGPT</span>
           <span className="cursor-pointer leading-[0]" onClick={openOptionsPage}>
             <GearIcon size={14} />
           </span>
@@ -294,7 +294,7 @@ function ChatGPTQuery(props: Props) {
               return (
                 <span className="block mt-2">
                   Still not working? Follow{' '}
-                  <a href="https://github.com/SingularityLabs-ai/chatgpt-on-addonsopera-extension#troubleshooting">
+                  <a href="https://github.com/SingularityLabs-ai/chatgpt-on-addonsedge-extension#troubleshooting">
                     Brave Troubleshooting
                   </a>
                 </span>
