@@ -4,11 +4,44 @@ import '../base.css'
 import './styles.scss'
 import { config } from './website-configs'
 // import { useMemo } from 'react';
+import Browser from 'webextension-polyfill'
+// import { useEffect, useState } from 'react'
+import { toast, Zoom, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-let nextindex = 0
-const SUMMARY_SELECTOR =
-  'body > div > div.row.view-animate.ng-scope > history-tabs > div > div:nth-child(2) > div > history-tab:nth-child(3) > div > div > div > history-tabs > div > div.col-md-9 > div > history-tab:nth-child({x}) > div > div > editable-field:nth-child(1) > div > div > div > textarea'
-const DESCRIPTION_SELECTOR = '#formly_2_textarea_description_1'
+const locmap = {
+  'zh_CN':'Chinese (China)',
+  'en':'English',
+  'fr':'French',
+  'de':'German',
+  'he':'Hebrew',
+  'hu':'Hungarian',
+  'ko':'Korean',
+  'pt_PT':'Portuguese (Portugal)',
+  'ro':'Romanian',
+  'ru':'Russian',
+  'es':'Spanish',
+  'uk':'Ukrainian'
+}
+
+const revlocmap = {
+  'Chinese (China)':'zh_CN',
+  'English':'en',
+  'French':'fr',
+  'German':'de',
+  'Hebrew':'he',
+  'Hungarian':'hu',
+  'Korean':'ko',
+  'Portuguese (Portugal)':'pt_PT',
+  'Romanian':'ro',
+  'Russian':'ru',
+  'Spanish':'es',
+  'Ukrainian':'uk'
+}
+
+let nextIndex = 0
+let ans = ""
+const DESCRIPTION_SELECTOR = 'textarea.form-control'
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
@@ -98,8 +131,129 @@ const getEnglishDesc = () => {
   return promise
 }
 
+const setRowDesc = (leftpaneindex:number) => {
+  let promise = Promise.resolve()
+  let leftPaneRowEle;
+
+  promise = promise.then(function () {
+    return new Promise((resolve, reject) => {
+      console.log('found at:', leftpaneindex)
+      const en: HTMLElement = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
+      leftPaneRowEle = en.children[leftpaneindex]
+      resolve()
+    })
+  })
+
+  promise = promise.then(function () {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        leftPaneRowEle.scrollIntoView()
+        leftPaneRowEle.children[5].children[0].children[0].click()
+        console.log('downloadBtn clicked for', leftPaneRowEle)
+        resolve()
+      }, 4000)
+    })
+  })
+
+  promise = promise.then(function () {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        const f = () => {
+          const port = Browser.runtime.connect()
+          const listener = (msg: any) => {
+            console.log('frontend msg:', msg)
+            try {
+              if (msg.text) {
+                ans = msg.text
+                // setAnswer(msg)
+                // setStatus('success')
+              } else if (msg.error) {
+                console.log('frontend msg.error:', msg.error)
+                // setError(msg.error)
+                // setStatus('error')
+                toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
+              } else if (msg.event === 'DONE') {
+                // setDone(true)
+                if (ans) {
+                  const extractFirstAndLastSentence = (inputString) => {
+                    const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
+                    if (sentenceMatch) {
+                      const firstSentence = sentenceMatch[0].trim();
+                      const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
+                      return [firstSentence, lastSentence];
+                    } else {
+                      return [inputString.trim(), inputString.trim()];
+                    }
+                  }
+                  const containsAnyWord = (inputString, wordArray) => {
+                    for (const word of wordArray) {
+                      if (inputString.includes(word)) {
+                        return true;
+                      } else {
+                        console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
+                      }
+                    }
+                    return false;
+                  }
+                  const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
+                  console.log("ans b4=", ans)
+                  console.log("firstSentence=", firstSentence)
+                  if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
+                    console.log("Replacing firstSentence=", firstSentence)
+                    ans = ans.replace(firstSentence, "")
+                  }
+                  console.log("lastSentence=", lastSentence)
+                  if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
+                    console.log("Replacing lastSentence=", lastSentence)
+                    ans = ans.replace(lastSentence, "")
+                  }
+                  console.log("ans Ar=", ans)
+                  // let frm = document.querySelector('form');
+                  // frm.value.description = 
+                  document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+                  document.querySelector(DESCRIPTION_SELECTOR).focus()
+                  // document.querySelector(DESCRIPTION_SELECTOR).addEventListener('click', this.toggleMenu);
+                  document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
+                  const event = new Event('input');
+                  document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
+                } else {
+                  document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+                  document.querySelector(DESCRIPTION_SELECTOR).value = 'new ' + leftPaneRowEle.children[0].children[0].innerText
+                }
+                setTimeout(function () {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  document.querySelector('.he-button').shadowRoot.querySelector("button").click()
+                  setTimeout(function () {
+                    document.querySelector('.close-button').click()
+                    const successMsg = "Done for " + allTFBs[nextIndex]
+                    toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+                    nextIndex = nextIndex + 1;
+                  }, 4000)
+                }, 8000)
+              }
+            } catch (e) {
+              console.log(e)
+            }
+          }
+          port.onMessage.addListener(listener)
+          port.postMessage({ question: "Can you tranlate the following into " + allTFBs[leftpaneindex] + ":" + desc })
+          return () => {
+            port.onMessage.removeListener(listener)
+            port.disconnect()
+          }
+        }
+        ans = ""
+        f();
+        resolve()
+      }, 4000)
+    })
+  })
+  return promise
+}
+
 async function mountUploadLocalesButton(appendContainer: object, containerid?: string) {
   const handleFileChange = (event) => {
+    nextIndex = 0
     console.log(event)
     files = event.target.files
     console.log(files)
@@ -145,7 +299,8 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     directory
                     multiple
                   />
-                  <button onClick={() => handleNextIndex()}> Next </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <ToastContainer />
                 </>,
                 container,
               )
@@ -159,62 +314,106 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
     event.preventDefault()
   }
 
-  const handleNextIndex = () => {
-    console.log('mountNextButton:handleNextIndex', nextindex, desc)
-    if (nextindex >= files.length) {
-      alert('Done for all files')
+  const handlenextIndex = () => {
+    console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
+    if (allTFBs[nextIndex] === "English") {
+      const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]
+      console.log(info);
+      toast.info(info, { position: 'bottom-right', transition: Zoom })
+      nextIndex = nextIndex + 1
+    }
+    if (nextIndex >= files.length) {
+      const successMsg = "Done for all files"
+      alert(successMsg)
+      toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
       return
     }
+    if (desc.length > 0) {
+      let promise = setRowDesc(nextIndex);
+      promise = promise.then(function () {
+        return new Promise((resolve, reject) => {
+          setTimeout(function () {
+            const container = document.createElement('div')
+            container.className = 'locales-upload-container'
+            waitForElm(siteConfig.inputQuery[0]).then((appendContainer) => {
+              console.log(siteConfig.inputQuery[0], 'Element is ready')
+              console.log('appendContainer', appendContainer)
+              appendContainer.appendChild(container)
+              render(
+                <>
+                  <FileInput
+                    onChange={(e) => handleFileChange(e)}
+                    buttonId={containerid}
+                    buttonSize="small"
+                    displayText="Upload Locales"
+                    webkitdirectory
+                    directory
+                    multiple
+                  />
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <ToastContainer />
+                </>,
+                container,
+              )
+            })
+            resolve()
+          }, 4000)
+        })
+      })
+    } else {
+      if (files) {
+        const file = files[nextIndex]
+        const reader = new FileReader()
+        reader.fileName = file.name
+        reader.webkitRelativePath = file.webkitRelativePath
+        reader.onload = (event) => {
+          const fileName = event.target.fileName
+          const webkitRelativePath = event.target.webkitRelativePath
+          const content = JSON.parse(event.target.result)
+          console.log('webkitRelativePath:', webkitRelativePath)
+          console.log('fileName:', fileName)
+          console.log(content)
+          const searchElem = locmap[webkitRelativePath.split('/')[1]]
+          console.log('searchElem:', searchElem)
+          const leftpaneindex = allTFBs.indexOf(searchElem)
+          console.log('mountNextButton:found at leftpaneindex:', leftpaneindex)
+          //     const en: HTMLElement = document.getElementsByClassName('nav-stacked')[0] as HTMLElement
+          //     const leftPaneRowEle = en.children[leftpaneindex]
+          //     console.log('mountNextButton:reqdLocaleElems', leftPaneRowEle)
 
-    if (files) {
-      const file = files[nextindex]
-      const reader = new FileReader()
-      reader.fileName = file.name
-      reader.webkitRelativePath = file.webkitRelativePath
-      reader.onload = (event) => {
-        const fileName = event.target.fileName
-        const webkitRelativePath = event.target.webkitRelativePath
-        const content = JSON.parse(event.target.result)
-        console.log('webkitRelativePath:', webkitRelativePath)
-        // console.log('fileName:', fileName)
-        // console.log(content)
-        //     const searchElem = '(' + webkitRelativePath.split('/')[1].replace('_', '-') + ')'
-        //     const leftpaneindex = allTFBs.indexOf(searchElem)
-        //     console.log('mountNextButton:found at leftpaneindex:', leftpaneindex)
-        //     const en: HTMLElement = document.getElementsByClassName('nav-stacked')[0] as HTMLElement
-        //     const leftPaneRowEle = en.children[leftpaneindex]
-        //     console.log('mountNextButton:reqdLocaleElems', leftPaneRowEle)
-
-        //     setTimeout(() => {
-        //       leftPaneRowEle.scrollIntoView()
-        //       setTimeout(() => {
-        //         leftPaneRowEle.children[0].click()
-        //         setTimeout(() => {
-        //           const summ = document.querySelector(
-        //             SUMMARY_SELECTOR.replace('{x}', leftpaneindex + 1),
-        //           ).value
-        //           const desc = document.querySelector(
-        //             DESCRIPTION_SELECTOR.replace('{x}', leftpaneindex + 1),
-        //           ).value
-        //           console.log('summ:', summ)
-        //           console.log('desc:', desc)
-        //           if (summ.length <= 2) {
-        //             // document.querySelector(SUMMARY_SELECTOR.replace('{x}', leftpaneindex + 1)).value = 'TODO'
-        //           }
-        //           if (desc.length <= 2) {
-        //             document.querySelector(
-        //               DESCRIPTION_SELECTOR.replace('{x}', leftpaneindex + 1),
-        //             ).value = content.appDesc.message
-        //           }
-        //           window.scrollTo({ top: 0, behavior: 'smooth' })
-        //           console.log('=====x====', nextindex + 1, 'files Done =====')
-        nextindex++
-        //         }, 4000)
-        //       }, 4000)
-        //     }, 4000)
+          //     setTimeout(() => {
+          //       leftPaneRowEle.scrollIntoView()
+          //       setTimeout(() => {
+          //         leftPaneRowEle.children[0].click()
+          //         setTimeout(() => {
+          //           const summ = document.querySelector(
+          //             SUMMARY_SELECTOR.replace('{x}', leftpaneindex + 1),
+          //           ).value
+          //           const desc = document.querySelector(
+          //             DESCRIPTION_SELECTOR.replace('{x}', leftpaneindex + 1),
+          //           ).value
+          //           console.log('desc:', desc)
+          //           if (summ.length <= 2) {
+          //             // document.querySelector(SUMMARY_SELECTOR.replace('{x}', leftpaneindex + 1)).value = 'TODO'
+          //           }
+          //           if (desc.length <= 2) {
+          //             document.querySelector(
+          //               DESCRIPTION_SELECTOR.replace('{x}', leftpaneindex + 1),
+          //             ).value = content.appDesc.message
+          //           }
+          //           window.scrollTo({ top: 0, behavior: 'smooth' })
+          //           console.log('=====x====', nextIndex + 1, 'files Done =====')
+          const successMsg = "Done for " + allTFBs[nextIndex]
+          toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+          nextIndex = nextIndex + 1;
+          //         }, 4000)
+          //       }, 4000)
+          //     }, 4000)
+        }
+        reader.readAsText(file)
       }
-      reader.readAsText(file)
     }
+
   }
 
   const container = document.createElement('div')
@@ -231,7 +430,8 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button onClick={() => handleNextIndex()}> Next </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Next </button>
+      <ToastContainer />
     </>,
     container,
   )
