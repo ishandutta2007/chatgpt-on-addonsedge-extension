@@ -3,9 +3,7 @@ import FileInput from '~/content-script/components/FileInput'
 import '../base.css'
 import './styles.scss'
 import { config } from './website-configs'
-// import { useMemo } from 'react';
 import Browser from 'webextension-polyfill'
-// import { useEffect, useState } from 'react'
 import { toast, Zoom, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -165,15 +163,10 @@ const setRowDesc = (leftpaneindex:number) => {
             try {
               if (msg.text) {
                 ans = msg.text
-                // setAnswer(msg)
-                // setStatus('success')
               } else if (msg.error) {
                 console.log('frontend msg.error:', msg.error)
-                // setError(msg.error)
-                // setStatus('error')
                 toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
               } else if (msg.event === 'DONE') {
-                // setDone(true)
                 if (ans) {
                   const extractFirstAndLastSentence = (inputString) => {
                     const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
@@ -208,17 +201,13 @@ const setRowDesc = (leftpaneindex:number) => {
                     ans = ans.replace(lastSentence, "")
                   }
                   console.log("ans Ar=", ans)
-                  // let frm = document.querySelector('form');
-                  // frm.value.description = 
                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
                   document.querySelector(DESCRIPTION_SELECTOR).focus()
-                  // document.querySelector(DESCRIPTION_SELECTOR).addEventListener('click', this.toggleMenu);
                   document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
                   const event = new Event('input');
                   document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
                 } else {
                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
-                  document.querySelector(DESCRIPTION_SELECTOR).value = 'new ' + leftPaneRowEle.children[0].children[0].innerText
                 }
                 setTimeout(function () {
                   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -266,11 +255,9 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
       const reqdLocaleElems = elm.children
       for (let i = 0; i < countLocales; i++) {
         try {
-          console.log(reqdLocaleElems[i].children[0].children[0].innerText) //.split(' ').slice(-1)[0]
+          console.log(reqdLocaleElems[i].children[0].children[0].innerText)
           allTFBs.push(
             reqdLocaleElems[i].children[0].children[0].innerText,
-            // .split(' ')
-            // .slice(-1)[0] /*.replace("(", "").replace(")", "")*/,
           )
         } catch (err: Error) {
           console.log(err)
@@ -299,7 +286,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     directory
                     multiple
                   />
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
@@ -350,7 +337,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     directory
                     multiple
                   />
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
@@ -430,7 +417,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Next </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Next </button>
       <ToastContainer />
     </>,
     container,
