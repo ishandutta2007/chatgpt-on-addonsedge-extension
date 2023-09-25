@@ -324,7 +324,7 @@ const set2RowsDesc = async (leftpaneindexes:number[]) => {
       leftPaneRowElei = en.children[leftpaneindexes[i]]
       if(leftPaneRowElei)
         await f(leftPaneRowElei, i)
-      console.log(i, "-th Done");
+      console.log(nextIndex - 1, "-th(0-indexed) Done");
     } catch (err) {
       console.log(err)
     }
@@ -377,9 +377,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     directory
                     multiple
                   />
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
                   <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
                   <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
@@ -394,7 +395,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
     event.preventDefault()
   }
 
-  const handlenextIndex = async (repeatrows = 1) => {
+  const handlenextIndex = async (repeatrows) => {
     console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
     if (allTFBs[nextIndex] === "English") {
       const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]
@@ -414,40 +415,44 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         await set2RowsDesc([nextIndex]);
       else if (repeatrows === 2)
         await set2RowsDesc([nextIndex,nextIndex+1]);
-      else
+      else if (repeatrows === 3)
         await set2RowsDesc([nextIndex,nextIndex+1,nextIndex+2]);
-      // promise = Promise.resolve().then(function () {
-      //   return new Promise((resolve, reject) => {
-          setTimeout(function () {
-            const container = document.createElement('div')
-            container.className = 'locales-upload-container'
-            waitForElm(siteConfig.inputQuery[0]).then((appendContainer) => {
-              console.log(siteConfig.inputQuery[0], 'Element is ready')
-              console.log('appendContainer', appendContainer)
-              appendContainer.appendChild(container)
-              render(
-                <>
-                  <FileInput
-                    onChange={(e) => handleFileChange(e)}
-                    buttonId={containerid}
-                    buttonSize="small"
-                    displayText="Upload Locales"
-                    webkitdirectory
-                    directory
-                    multiple
-                  />
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <ToastContainer />
-                </>,
-                container,
-              )
-            })
-            // resolve()
-          }, 4000)
-      //   })
-      // })
+      else {
+        let rem = allTFBs.length - nextIndex
+        let array = [],end = nextIndex + rem - 1, start = nextIndex, a = end - start + 1;
+        while(a--) array[a] = end--
+        await set2RowsDesc(array);
+      }
+
+      setTimeout(function () {
+        const container = document.createElement('div')
+        container.className = 'locales-upload-container'
+        waitForElm(siteConfig.inputQuery[0]).then((appendContainer) => {
+          console.log(siteConfig.inputQuery[0], 'Element is ready')
+          console.log('appendContainer', appendContainer)
+          appendContainer.appendChild(container)
+          render(
+            <>
+              <FileInput
+                onChange={(e) => handleFileChange(e)}
+                buttonId={containerid}
+                buttonSize="small"
+                displayText="Upload Locales"
+                webkitdirectory
+                directory
+                multiple
+              />
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set All Remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <ToastContainer />
+            </>,
+            container,
+          )
+        })
+      }, 1000)
+
     } else {
       if (files) {
         const file = files[nextIndex]
@@ -518,9 +523,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
       <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <ToastContainer />
     </>,
     container,
