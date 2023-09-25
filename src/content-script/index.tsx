@@ -131,117 +131,6 @@ const getEnglishDesc = () => {
   return promise
 }
 
-// const setRowDesc = (leftpaneindex:number) => {
-//   let promise = Promise.resolve()
-//   let leftPaneRowEle;
-
-//   promise = promise.then(function () {
-//     return new Promise((resolve, reject) => {
-//       console.log('found at:', leftpaneindex)
-//       const en: HTMLElement = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
-//       leftPaneRowEle = en.children[leftpaneindex]
-//       resolve()
-//     })
-//   })
-
-//   promise = promise.then(function () {
-//     return new Promise((resolve, reject) => {
-//       setTimeout(function () {
-//         leftPaneRowEle.scrollIntoView()
-//         leftPaneRowEle.children[5].children[0].children[0].click()
-//         console.log('downloadBtn clicked for', leftPaneRowEle)
-//         resolve()
-//       }, 4000)
-//     })
-//   })
-
-//   promise = promise.then(function () {
-//     return new Promise((resolve, reject) => {
-//       setTimeout(function () {
-//         const f = () => {
-//           const port = Browser.runtime.connect()
-//           const listener = (msg: any) => {
-//             console.log('frontend msg:', msg)
-//             try {
-//               if (msg.text) {
-//                 ans = msg.text
-//               } else if (msg.error) {
-//                 console.log('frontend msg.error:', msg.error)
-//                 toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
-//               } else if (msg.event === 'DONE') {
-//                 if (ans) {
-//                   const extractFirstAndLastSentence = (inputString) => {
-//                     const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
-//                     if (sentenceMatch) {
-//                       const firstSentence = sentenceMatch[0].trim();
-//                       const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
-//                       return [firstSentence, lastSentence];
-//                     } else {
-//                       return [inputString.trim(), inputString.trim()];
-//                     }
-//                   }
-//                   const containsAnyWord = (inputString, wordArray) => {
-//                     for (const word of wordArray) {
-//                       if (inputString.includes(word)) {
-//                         return true;
-//                       } else {
-//                         console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
-//                       }
-//                     }
-//                     return false;
-//                   }
-//                   const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
-//                   console.log("ans b4=", ans)
-//                   console.log("firstSentence=", firstSentence)
-//                   if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
-//                     console.log("Replacing firstSentence=", firstSentence)
-//                     ans = ans.replace(firstSentence, "")
-//                   }
-//                   console.log("lastSentence=", lastSentence)
-//                   if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
-//                     console.log("Replacing lastSentence=", lastSentence)
-//                     ans = ans.replace(lastSentence, "")
-//                   }
-//                   console.log("ans Ar=", ans)
-//                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
-//                   document.querySelector(DESCRIPTION_SELECTOR).focus()
-//                   document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
-//                   const event = new Event('input');
-//                   document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
-//                 } else {
-//                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
-//                 }
-//                 setTimeout(function () {
-//                   window.scrollTo({ top: 0, behavior: 'smooth' })
-//                   document.querySelector('.he-button').shadowRoot.querySelector("button").click()
-//                   setTimeout(function () {
-//                     document.querySelector('.close-button').click()
-//                     const successMsg = "Done for " + allTFBs[nextIndex]
-//                     toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
-//                     nextIndex = nextIndex + 1;
-//                   }, 4000)
-//                 }, 8000)
-//               }
-//             } catch (e) {
-//               console.log(e)
-//             }
-//           }
-//           port.onMessage.addListener(listener)
-//           port.postMessage({ question: "Can you translate the following into " + allTFBs[leftpaneindex] + ":" + desc })
-//           return () => {
-//             port.onMessage.removeListener(listener)
-//             port.disconnect()
-//           }
-//         }
-//         ans = ""
-//         f();
-//         resolve()
-//       }, 4000)
-//     })
-//   })
-//   return promise
-// }
-
 
 const set2RowsDesc = async (leftpaneindexes:number[]) => {
   const f = (leftPaneRowEle,index) => {
@@ -321,10 +210,13 @@ const set2RowsDesc = async (leftpaneindexes:number[]) => {
   for (let i = 0; i < leftpaneindexes.length; i++) {
     try {
       en = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
-      leftPaneRowElei = en.children[leftpaneindexes[i]]
-      if(leftPaneRowElei)
-        await f(leftPaneRowElei, i)
-      console.log(nextIndex - 1, "-th(0-indexed) Done");
+      // waitForElm('#extensionListTable tbody').then((elm) => {
+      //   const en = elm[0]
+        leftPaneRowElei = en.children[leftpaneindexes[i]]
+        if(leftPaneRowElei)
+          await f(leftPaneRowElei, i)
+        console.log(nextIndex - 1, "-th(0-indexed) Done");
+      // });
     } catch (err) {
       console.log(err)
     }
