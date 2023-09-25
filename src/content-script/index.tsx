@@ -6,7 +6,7 @@ import { config } from './website-configs'
 import Browser from 'webextension-polyfill'
 import { toast, Zoom, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
+import  { extractFirstAndLastSentence, containsAnyWord } from './utils'
 //Not required for chatGPT case
 const locmap = {
   'zh_CN':'Chinese (China)',
@@ -131,115 +131,204 @@ const getEnglishDesc = () => {
   return promise
 }
 
-const setRowDesc = (leftpaneindex:number) => {
-  let promise = Promise.resolve()
-  let leftPaneRowEle;
+// const setRowDesc = (leftpaneindex:number) => {
+//   let promise = Promise.resolve()
+//   let leftPaneRowEle;
 
-  promise = promise.then(function () {
-    return new Promise((resolve, reject) => {
-      console.log('found at:', leftpaneindex)
-      const en: HTMLElement = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
-      leftPaneRowEle = en.children[leftpaneindex]
-      resolve()
-    })
-  })
+//   promise = promise.then(function () {
+//     return new Promise((resolve, reject) => {
+//       console.log('found at:', leftpaneindex)
+//       const en: HTMLElement = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
+//       leftPaneRowEle = en.children[leftpaneindex]
+//       resolve()
+//     })
+//   })
 
-  promise = promise.then(function () {
-    return new Promise((resolve, reject) => {
-      setTimeout(function () {
-        leftPaneRowEle.scrollIntoView()
-        leftPaneRowEle.children[5].children[0].children[0].click()
-        console.log('downloadBtn clicked for', leftPaneRowEle)
-        resolve()
-      }, 4000)
-    })
-  })
+//   promise = promise.then(function () {
+//     return new Promise((resolve, reject) => {
+//       setTimeout(function () {
+//         leftPaneRowEle.scrollIntoView()
+//         leftPaneRowEle.children[5].children[0].children[0].click()
+//         console.log('downloadBtn clicked for', leftPaneRowEle)
+//         resolve()
+//       }, 4000)
+//     })
+//   })
 
-  promise = promise.then(function () {
-    return new Promise((resolve, reject) => {
-      setTimeout(function () {
-        const f = () => {
-          const port = Browser.runtime.connect()
-          const listener = (msg: any) => {
-            console.log('frontend msg:', msg)
-            try {
-              if (msg.text) {
-                ans = msg.text
-              } else if (msg.error) {
-                console.log('frontend msg.error:', msg.error)
-                toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
-              } else if (msg.event === 'DONE') {
-                if (ans) {
-                  const extractFirstAndLastSentence = (inputString) => {
-                    const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
-                    if (sentenceMatch) {
-                      const firstSentence = sentenceMatch[0].trim();
-                      const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
-                      return [firstSentence, lastSentence];
-                    } else {
-                      return [inputString.trim(), inputString.trim()];
-                    }
-                  }
-                  const containsAnyWord = (inputString, wordArray) => {
-                    for (const word of wordArray) {
-                      if (inputString.includes(word)) {
-                        return true;
-                      } else {
-                        console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
-                      }
-                    }
-                    return false;
-                  }
-                  const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
-                  console.log("ans b4=", ans)
-                  console.log("firstSentence=", firstSentence)
-                  if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
-                    console.log("Replacing firstSentence=", firstSentence)
-                    ans = ans.replace(firstSentence, "")
-                  }
-                  console.log("lastSentence=", lastSentence)
-                  if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
-                    console.log("Replacing lastSentence=", lastSentence)
-                    ans = ans.replace(lastSentence, "")
-                  }
-                  console.log("ans Ar=", ans)
-                  document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
-                  document.querySelector(DESCRIPTION_SELECTOR).focus()
-                  document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
-                  const event = new Event('input');
-                  document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
-                } else {
-                  document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+//   promise = promise.then(function () {
+//     return new Promise((resolve, reject) => {
+//       setTimeout(function () {
+//         const f = () => {
+//           const port = Browser.runtime.connect()
+//           const listener = (msg: any) => {
+//             console.log('frontend msg:', msg)
+//             try {
+//               if (msg.text) {
+//                 ans = msg.text
+//               } else if (msg.error) {
+//                 console.log('frontend msg.error:', msg.error)
+//                 toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
+//               } else if (msg.event === 'DONE') {
+//                 if (ans) {
+//                   const extractFirstAndLastSentence = (inputString) => {
+//                     const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
+//                     if (sentenceMatch) {
+//                       const firstSentence = sentenceMatch[0].trim();
+//                       const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
+//                       return [firstSentence, lastSentence];
+//                     } else {
+//                       return [inputString.trim(), inputString.trim()];
+//                     }
+//                   }
+//                   const containsAnyWord = (inputString, wordArray) => {
+//                     for (const word of wordArray) {
+//                       if (inputString.includes(word)) {
+//                         return true;
+//                       } else {
+//                         console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
+//                       }
+//                     }
+//                     return false;
+//                   }
+//                   const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
+//                   console.log("ans b4=", ans)
+//                   console.log("firstSentence=", firstSentence)
+//                   if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
+//                     console.log("Replacing firstSentence=", firstSentence)
+//                     ans = ans.replace(firstSentence, "")
+//                   }
+//                   console.log("lastSentence=", lastSentence)
+//                   if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
+//                     console.log("Replacing lastSentence=", lastSentence)
+//                     ans = ans.replace(lastSentence, "")
+//                   }
+//                   console.log("ans Ar=", ans)
+//                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+//                   document.querySelector(DESCRIPTION_SELECTOR).focus()
+//                   document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
+//                   const event = new Event('input');
+//                   document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
+//                 } else {
+//                   document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+//                 }
+//                 setTimeout(function () {
+//                   window.scrollTo({ top: 0, behavior: 'smooth' })
+//                   document.querySelector('.he-button').shadowRoot.querySelector("button").click()
+//                   setTimeout(function () {
+//                     document.querySelector('.close-button').click()
+//                     const successMsg = "Done for " + allTFBs[nextIndex]
+//                     toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+//                     nextIndex = nextIndex + 1;
+//                   }, 4000)
+//                 }, 8000)
+//               }
+//             } catch (e) {
+//               console.log(e)
+//             }
+//           }
+//           port.onMessage.addListener(listener)
+//           port.postMessage({ question: "Can you translate the following into " + allTFBs[leftpaneindex] + ":" + desc })
+//           return () => {
+//             port.onMessage.removeListener(listener)
+//             port.disconnect()
+//           }
+//         }
+//         ans = ""
+//         f();
+//         resolve()
+//       }, 4000)
+//     })
+//   })
+//   return promise
+// }
+
+
+const set2RowsDesc = async (leftpaneindexes:number[]) => {
+  const f = (leftPaneRowEle,index) => {
+    return new Promise(async (resolve, reject) => {
+      leftPaneRowEle.scrollIntoView()
+      leftPaneRowEle.children[5].children[0].children[0].click()
+      console.log('downloadBtn clicked for', leftPaneRowEle)
+      ans = ""
+      const listener = (msg: any) => {
+        // return new Promise((resolve, reject) => {
+          console.log('frontend msg:', msg)
+          try {
+            if (msg.text) {
+              ans = msg.text
+            } else if (msg.error) {
+              console.log('frontend msg.error:', msg.error)
+              toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
+            } else if (msg.event === 'DONE') {
+              if (ans) {
+                const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
+                console.log("ans b4=", ans)
+                console.log("firstSentence=", firstSentence)
+                if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
+                  console.log("Replacing firstSentence=", firstSentence)
+                  ans = ans.replace(firstSentence, "")
                 }
-                setTimeout(function () {
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                  document.querySelector('.he-button').shadowRoot.querySelector("button").click()
-                  setTimeout(function () {
-                    document.querySelector('.close-button').click()
-                    const successMsg = "Done for " + allTFBs[nextIndex]
-                    toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
-                    nextIndex = nextIndex + 1;
-                  }, 4000)
-                }, 8000)
+                console.log("lastSentence=", lastSentence)
+                if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
+                  console.log("Replacing lastSentence=", lastSentence)
+                  ans = ans.replace(lastSentence, "")
+                }
+                console.log("ans Ar=", ans)
+                document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+                document.querySelector(DESCRIPTION_SELECTOR).focus()
+                document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
+                const event = new Event('input');
+                document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
+              } else {
+                document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
               }
-            } catch (e) {
-              console.log(e)
+              setTimeout(function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                document.querySelector('.he-button').shadowRoot.querySelector("button").click()
+                setTimeout(function () {
+                  document.querySelector('.close-button').click()
+                  const successMsg = "Done for " + allTFBs[nextIndex]
+                  toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+                  nextIndex = nextIndex + 1;
+                }, 4000)
+              }, 8000)
             }
+          } catch (e) {
+            console.log(e)
           }
-          port.onMessage.addListener(listener)
-          port.postMessage({ question: "Can you tranlate the following into " + allTFBs[leftpaneindex] + ":" + desc })
-          return () => {
-            port.onMessage.removeListener(listener)
-            port.disconnect()
-          }
-        }
-        ans = ""
-        f();
-        resolve()
-      }, 4000)
+        //   resolve()
+        // });
+      }
+
+      const port = Browser.runtime.connect()
+      port.onMessage.addListener((msg, sender) => {
+        console.log("BG page received message", msg, "from", sender);
+        listener(msg)
+      });
+
+      port.onDisconnect.addListener(() => {
+        console.log("Port disconnected");
+        resolve(); // Resolve the Promise when the port disconnects
+      });
+
+      await port.postMessage({ question: "Can you translate the following into " + allTFBs[leftpaneindexes[index]] + ":" + desc });
     })
-  })
-  return promise
+  }
+
+  let en: HTMLElement;
+  let leftPaneRowElei;
+
+  for (let i = 0; i < leftpaneindexes.length; i++) {
+    try {
+      en = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
+      leftPaneRowElei = en.children[leftpaneindexes[i]]
+      if(leftPaneRowElei)
+        await f(leftPaneRowElei, i)
+      console.log(i, "-th Done");
+    } catch (err) {
+      console.log(err)
+    }
+  }
 }
 
 async function mountUploadLocalesButton(appendContainer: object, containerid?: string) {
@@ -289,6 +378,8 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     multiple
                   />
                   <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
@@ -303,7 +394,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
     event.preventDefault()
   }
 
-  const handlenextIndex = () => {
+  const handlenextIndex = async (repeatrows = 1) => {
     console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
     if (allTFBs[nextIndex] === "English") {
       const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]
@@ -318,9 +409,15 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
       return
     }
     if (desc.length > 0) {
-      let promise = setRowDesc(nextIndex);
-      promise = promise.then(function () {
-        return new Promise((resolve, reject) => {
+      // let promise = (repeatrows === 1) ? setRowDesc(nextIndex):
+      if (repeatrows === 1)
+        await set2RowsDesc([nextIndex]);
+      else if (repeatrows === 2)
+        await set2RowsDesc([nextIndex,nextIndex+1]);
+      else
+        await set2RowsDesc([nextIndex,nextIndex+1,nextIndex+2]);
+      // promise = Promise.resolve().then(function () {
+      //   return new Promise((resolve, reject) => {
           setTimeout(function () {
             const container = document.createElement('div')
             container.className = 'locales-upload-container'
@@ -340,15 +437,17 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     multiple
                   />
                   <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
               )
             })
-            resolve()
+            // resolve()
           }, 4000)
-        })
-      })
+      //   })
+      // })
     } else {
       if (files) {
         const file = files[nextIndex]
@@ -419,7 +518,9 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Next </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <ToastContainer />
     </>,
     container,
