@@ -7,6 +7,7 @@ import Browser from 'webextension-polyfill'
 import { toast, Zoom, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
+//Not required for chatGPT case
 const locmap = {
   'zh_CN':'Chinese (China)',
   'en':'English',
@@ -22,6 +23,7 @@ const locmap = {
   'uk':'Ukrainian'
 }
 
+//Not required for any case
 const revlocmap = {
   'Chinese (China)':'zh_CN',
   'English':'en',

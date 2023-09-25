@@ -8,6 +8,12 @@
 
 <img width="1418" alt="image" src="https://github.com/SingularityLabs-ai/chatgpt-on-whatsapp-extension/blob/main/screenshots/GGPT_Screenshot_1280x800.png">
 
+## TODO:
+
+- all at once (sequenciial chaining)
+- image
+- download text to locales
+
 ## Troubleshooting
 
 ### How to make it work in Brave
