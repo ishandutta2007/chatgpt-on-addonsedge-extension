@@ -134,7 +134,7 @@ const getEnglishDesc = () => {
 }
 
 
-const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) => {
+const set2RowsDesc = async (appendContainer: {}, leftpaneindexes:number[]) => {
   const f = (leftPaneRowEle,index) => {
     return new Promise(async (resolve, reject) => {
       leftPaneRowEle.scrollIntoView()
@@ -142,7 +142,7 @@ const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) =
       console.log('downloadBtn clicked for', leftPaneRowEle)
       ans = ""
       const listener = (msg: any) => {
-        // console.log('frontend msg:', msg)
+        // console.debug('frontend msg:', msg)
         try {
           if (msg.text) {
             ans = msg.text
@@ -188,7 +188,7 @@ const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) =
 
       const port = Browser.runtime.connect()
       port.onMessage.addListener((msg, sender) => {
-        // console.log("BG page received message", msg, "from", sender);
+        console.debug("BG page received message", msg, "from", sender);
         listener(msg)
       });
 
@@ -202,7 +202,7 @@ const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) =
           appendContainer.appendChild(container)
           render(
             <>
-              <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed focus:outline-none disabled:opacity-25" disabled> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
               <ToastContainer />
             </>,
             container,
@@ -238,7 +238,7 @@ const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) =
   }
 }
 
-async function mountUploadLocalesButton(appendContainer: object, containerid?: string) {
+async function mountUploadLocalesButton(appendContainer: {}, containerid?: string) {
   const handleFileChange = (event) => {
     nextIndex = 0
     console.log(event)
@@ -302,7 +302,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
     event.preventDefault()
   }
 
-  const handlenextIndex = async (appendContainer: object, repeatrows?: number) => {
+  const handlenextIndex = async (appendContainer: {}, repeatrows?: number) => {
     console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
     if (allTFBs[nextIndex] === "English") {
       const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]
@@ -317,20 +317,12 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
       return
     }
     if (desc.length > 0) {
-      let rem = repeatrows ? repeatrows : allTFBs.length - nextIndex
-      let array = [],end = nextIndex + rem - 1, start = nextIndex, a = end - start + 1;
-      while(a--) array[a] = end--
+      const rem = repeatrows ? repeatrows : allTFBs.length - nextIndex
+      const array = [], start = nextIndex;
+      let end = nextIndex + rem - 1, a = end - start + 1;
+      while(a--) array[a] = end--;
       console.log(array)
-
-      // if (repeatrows === 1)
-      //   await set2RowsDesc([nextIndex]);
-      // else if (repeatrows === 2)
-      //   await set2RowsDesc([nextIndex,nextIndex+1]);
-      // else if (repeatrows === 3)
-      //   await set2RowsDesc([nextIndex,nextIndex+1,nextIndex+2]);
-      // else {
-        await set2RowsDesc(appendContainer, array);
-      // }
+      await set2RowsDesc(appendContainer, array);
 
       setTimeout(function () {
         const container = document.createElement('div')
@@ -430,10 +422,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed focus:outline-none disabled:opacity-25" disabled> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed focus:outline-none disabled:opacity-25" disabled> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed focus:outline-none disabled:opacity-25" disabled> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed focus:outline-none disabled:opacity-25" disabled> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <ToastContainer />
     </>,
     container,
