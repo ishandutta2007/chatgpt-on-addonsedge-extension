@@ -42,6 +42,8 @@ const revlocmap = {
 let nextIndex = 0
 let ans = ""
 const DESCRIPTION_SELECTOR = 'textarea.form-control'
+const firstSentenceSearchKeywords = ["translation", "translated", "here is the", "here's"]
+const lastSentenceSearchKeywords = ["translation", "translated", "here is the", "here's"]
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
@@ -132,7 +134,7 @@ const getEnglishDesc = () => {
 }
 
 
-const set2RowsDesc = async (leftpaneindexes:number[]) => {
+const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) => {
   const f = (leftPaneRowEle,index) => {
     return new Promise(async (resolve, reject) => {
       leftPaneRowEle.scrollIntoView()
@@ -140,63 +142,72 @@ const set2RowsDesc = async (leftpaneindexes:number[]) => {
       console.log('downloadBtn clicked for', leftPaneRowEle)
       ans = ""
       const listener = (msg: any) => {
-        // return new Promise((resolve, reject) => {
-          console.log('frontend msg:', msg)
-          try {
-            if (msg.text) {
-              ans = msg.text
-            } else if (msg.error) {
-              console.log('frontend msg.error:', msg.error)
-              toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
-            } else if (msg.event === 'DONE') {
-              if (ans) {
-                const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
-                console.log("ans b4=", ans)
-                console.log("firstSentence=", firstSentence)
-                if ( containsAnyWord(firstSentence, ["transition", "translated", "here is the", "here's"]) ) {
-                  console.log("Replacing firstSentence=", firstSentence)
-                  ans = ans.replace(firstSentence, "")
-                }
-                console.log("lastSentence=", lastSentence)
-                if ( containsAnyWord(lastSentence, ["transition", "translated", "here is the", "here's"]) ) {
-                  console.log("Replacing lastSentence=", lastSentence)
-                  ans = ans.replace(lastSentence, "")
-                }
-                console.log("ans Ar=", ans)
-                document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
-                document.querySelector(DESCRIPTION_SELECTOR).focus()
-                document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
-                const event = new Event('input');
-                document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
-              } else {
-                document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+        // console.log('frontend msg:', msg)
+        try {
+          if (msg.text) {
+            ans = msg.text
+          } else if (msg.error) {
+            console.error('frontend msg.error:', msg.error)
+            toast.error(msg.error, { position: 'bottom-right', transition: Zoom })
+          } else if (msg.event === 'DONE') {
+            if (ans) {
+              const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
+              console.log("ans b4=", ans)
+              console.log("firstSentence=", firstSentence)
+              if (containsAnyWord(firstSentence, firstSentenceSearchKeywords)) {
+                console.log("Replacing firstSentence=", firstSentence)
+                ans = ans.replace(firstSentence, "")
               }
-              setTimeout(function () {
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                document.querySelector('.he-button').shadowRoot.querySelector("button").click()
-                setTimeout(function () {
-                  document.querySelector('.close-button').click()
-                  const successMsg = "Done for " + allTFBs[nextIndex]
-                  toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
-                  nextIndex = nextIndex + 1;
-                }, 4000)
-              }, 8000)
+              console.log("lastSentence=", lastSentence)
+              if (containsAnyWord(lastSentence, lastSentenceSearchKeywords)) {
+                console.log("Replacing lastSentence=", lastSentence)
+                ans = ans.replace(lastSentence, "")
+              }
+              console.log("ans Ar=", ans)
+              document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
+              document.querySelector(DESCRIPTION_SELECTOR).focus()
+              document.querySelector(DESCRIPTION_SELECTOR).value = ans.trim().replace(/['"]+/g, '');
+              const event = new Event('input');
+              document.querySelector(DESCRIPTION_SELECTOR).dispatchEvent(event);
+            } else {
+              document.querySelector(DESCRIPTION_SELECTOR).scrollIntoView()
             }
-          } catch (e) {
-            console.log(e)
+            setTimeout(function () {
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+              document.querySelector('.he-button').shadowRoot.querySelector("button").click()
+              setTimeout(function () {
+                document.querySelector('.close-button').click()
+                nextIndex = nextIndex + 1;
+              }, 4000)
+            }, 8000)
           }
-        //   resolve()
-        // });
+        } catch (e) {
+          console.log(e)
+        }
       }
 
       const port = Browser.runtime.connect()
       port.onMessage.addListener((msg, sender) => {
-        console.log("BG page received message", msg, "from", sender);
+        // console.log("BG page received message", msg, "from", sender);
         listener(msg)
       });
 
       port.onDisconnect.addListener(() => {
         console.log("Port disconnected");
+        waitForElm(siteConfig.inputQuery[0]).then((appendContainer) => {
+          console.log(siteConfig.inputQuery[0], 'Element is ready')
+          const container = document.createElement('div')
+          container.className = 'locales-upload-container'
+          console.log('appendContainer', appendContainer)
+          appendContainer.appendChild(container)
+          render(
+            <>
+              <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <ToastContainer />
+            </>,
+            container,
+          )
+        })
         resolve(); // Resolve the Promise when the port disconnects
       });
 
@@ -210,13 +221,17 @@ const set2RowsDesc = async (leftpaneindexes:number[]) => {
   for (let i = 0; i < leftpaneindexes.length; i++) {
     try {
       en = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
-      // waitForElm('#extensionListTable tbody').then((elm) => {
-      //   const en = elm[0]
         leftPaneRowElei = en.children[leftpaneindexes[i]]
-        if(leftPaneRowElei)
-          await f(leftPaneRowElei, i)
-        console.log(nextIndex - 1, "-th(0-indexed) Done");
-      // });
+        if(leftPaneRowElei) {
+          await f(leftPaneRowElei, i);
+          const successMsg = (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ") Done"
+          console.log(successMsg);
+          toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+        } else {
+          const failureMsg = "Couldn't find " + (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ")"
+          console.error(failureMsg);
+          toast.error(failureMsg, { position: 'bottom-right', transition: Zoom })
+        }
     } catch (err) {
       console.log(err)
     }
@@ -269,10 +284,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                     directory
                     multiple
                   />
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer)}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
                   <ToastContainer />
                 </>,
                 container,
@@ -287,7 +302,7 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
     event.preventDefault()
   }
 
-  const handlenextIndex = async (repeatrows) => {
+  const handlenextIndex = async (appendContainer: object, repeatrows?: number) => {
     console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
     if (allTFBs[nextIndex] === "English") {
       const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]
@@ -302,19 +317,20 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
       return
     }
     if (desc.length > 0) {
-      // let promise = (repeatrows === 1) ? setRowDesc(nextIndex):
-      if (repeatrows === 1)
-        await set2RowsDesc([nextIndex]);
-      else if (repeatrows === 2)
-        await set2RowsDesc([nextIndex,nextIndex+1]);
-      else if (repeatrows === 3)
-        await set2RowsDesc([nextIndex,nextIndex+1,nextIndex+2]);
-      else {
-        let rem = allTFBs.length - nextIndex
-        let array = [],end = nextIndex + rem - 1, start = nextIndex, a = end - start + 1;
-        while(a--) array[a] = end--
-        await set2RowsDesc(array);
-      }
+      let rem = repeatrows ? repeatrows : allTFBs.length - nextIndex
+      let array = [],end = nextIndex + rem - 1, start = nextIndex, a = end - start + 1;
+      while(a--) array[a] = end--
+      console.log(array)
+
+      // if (repeatrows === 1)
+      //   await set2RowsDesc([nextIndex]);
+      // else if (repeatrows === 2)
+      //   await set2RowsDesc([nextIndex,nextIndex+1]);
+      // else if (repeatrows === 3)
+      //   await set2RowsDesc([nextIndex,nextIndex+1,nextIndex+2]);
+      // else {
+        await set2RowsDesc(appendContainer, array);
+      // }
 
       setTimeout(function () {
         const container = document.createElement('div')
@@ -334,10 +350,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
                 directory
                 multiple
               />
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex()}> Set All Remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer, 3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-0.5 border border-blue-700 rounded" onClick={() => handlenextIndex(appendContainer)}> Set All Remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
               <ToastContainer />
             </>,
             container,
@@ -398,7 +414,6 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         reader.readAsText(file)
       }
     }
-
   }
 
   const container = document.createElement('div')
@@ -415,10 +430,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(1)}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(2)}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex(3)}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => handlenextIndex()}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <ToastContainer />
     </>,
     container,

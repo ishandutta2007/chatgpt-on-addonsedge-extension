@@ -53,22 +53,23 @@ export function isValidHttpUrl(string: string) {
 }
 
 export const extractFirstAndLastSentence = (inputString) => {
-                const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
-                if (sentenceMatch) {
-                  const firstSentence = sentenceMatch[0].trim();
-                  const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
-                  return [firstSentence, lastSentence];
-                } else {
-                  return [inputString.trim(), inputString.trim()];
-                }
-              }
+  const sentenceMatch = inputString.match(/[^-=:.!?]+[-=:.!?]/);
+  if (sentenceMatch) {
+    const firstSentence = sentenceMatch[0].trim();
+    const lastSentence = sentenceMatch[sentenceMatch.length - 1].trim();
+    return [firstSentence, lastSentence];
+  } else {
+    return [inputString.trim(), inputString.trim()];
+  }
+}
+
 export const containsAnyWord = (inputString, wordArray) => {
-                for (const word of wordArray) {
-                  if (inputString.includes(word)) {
-                    return true;
-                  } else {
-                    console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
-                  }
-                }
-                return false;
-              }
+  for (const word of wordArray) {
+    if (inputString.includes(word)) {
+      return true;
+    } else {
+      console.log(word, "NOT FOUND in", inputString, typeof(word), typeof(inputString))
+    }
+  }
+  return false;
+}
