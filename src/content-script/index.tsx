@@ -220,19 +220,22 @@ const set2RowsDesc = async (appendContainer: HTMLElement, leftpaneindexes:number
   for (let i = 0; i < leftpaneindexes.length; i++) {
     try {
       en = document.querySelectorAll('#extensionListTable tbody')[0] as HTMLElement
+      if(en)
         leftPaneRowElei = en.children[leftpaneindexes[i]]
-        if(leftPaneRowElei) {
-          await f(leftPaneRowElei, i);
-          const successMsg = (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ") Done"
-          console.log(successMsg);
-          toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
-        } else {
-          const failureMsg = "Couldn't find " + (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ")"
-          console.error(failureMsg);
-          toast.error(failureMsg, { position: 'bottom-right', transition: Zoom })
-        }
+      if(leftPaneRowElei) {
+        await f(leftPaneRowElei, i);
+        const successMsg = (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ") Done"
+        console.log(successMsg);
+        toast.success(successMsg, { position: 'bottom-right', transition: Zoom })
+      } else {
+        const failureMsg = "Couldn't find " + (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ")"
+        console.error(failureMsg);
+        toast.error(failureMsg, { position: 'bottom-right', transition: Zoom })
+      }
     } catch (err) {
-      console.log(err)
+      console.error(err)
+      const failureMsg = "Unexpected Error selecting row " + (nextIndex - 1) + "-th(0-indexed)(ie " + allTFBs[nextIndex - 1] + ")"
+      toast.error(failureMsg+err, { position: 'bottom-right', transition: Zoom })
     }
   }
 }
