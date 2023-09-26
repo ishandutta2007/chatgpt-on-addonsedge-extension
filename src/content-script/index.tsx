@@ -133,8 +133,7 @@ const getEnglishDesc = () => {
   return promise
 }
 
-
-const set2RowsDesc = async (appendContainer: {}, leftpaneindexes:number[]) => {
+const set2RowsDesc = async (appendContainer: HTMLElement, leftpaneindexes:number[]) => {
   const f = (leftPaneRowEle,index) => {
     return new Promise(async (resolve, reject) => {
       leftPaneRowEle.scrollIntoView()
@@ -238,7 +237,7 @@ const set2RowsDesc = async (appendContainer: {}, leftpaneindexes:number[]) => {
   }
 }
 
-async function mountUploadLocalesButton(appendContainer: {}, containerid?: string) {
+async function mountUploadLocalesButton(appendContainer: HTMLElement, containerid?: string) {
   const handleFileChange = (event) => {
     nextIndex = 0
     console.log(event)
@@ -302,7 +301,7 @@ async function mountUploadLocalesButton(appendContainer: {}, containerid?: strin
     event.preventDefault()
   }
 
-  const handlenextIndex = async (appendContainer: {}, repeatrows?: number) => {
+  const handlenextIndex = async (appendContainer: HTMLElement, repeatrows?: number) => {
     console.log('mountNextButton:handlenextIndex:nextIndex', nextIndex)
     if (allTFBs[nextIndex] === "English") {
       const info = "English is already set, moving on to " + allTFBs[nextIndex + 1]

@@ -23,7 +23,7 @@
       {
         "extendDefaults": true,
         "types": {
-          "{}": false
+          "//{}": false
         }
       }
     ]
