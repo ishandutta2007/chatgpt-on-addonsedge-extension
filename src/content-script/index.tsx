@@ -202,7 +202,7 @@ const set2RowsDesc = async (appendContainer: Object, leftpaneindexes:number[]) =
           appendContainer.appendChild(container)
           render(
             <>
-              <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+              <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
               <ToastContainer />
             </>,
             container,
@@ -430,10 +430,10 @@ async function mountUploadLocalesButton(appendContainer: object, containerid?: s
         directory
         multiple
       />
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
-      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" onClick={() => {}}> Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next Locale (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next 2 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set Next 3 Locales (Done:{nextIndex}/{allTFBs.length}) </button>
+      <button class="bg-blue-500 text-white font-bold py-2 px-4 m-0.5 rounded opacity-50 cursor-not-allowed" disabled className="px-8 py-3 text-white bg-blue-600 rounded focus:outline-none disabled:opacity-25" > Set All remaining Locales (Done:{nextIndex}/{allTFBs.length}) </button>
       <ToastContainer />
     </>,
     container,
