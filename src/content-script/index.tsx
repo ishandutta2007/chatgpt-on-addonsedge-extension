@@ -9,18 +9,63 @@ import 'react-toastify/dist/ReactToastify.css'
 import  { extractFirstAndLastSentence, containsAnyWord } from './utils'
 //Not required for chatGPT case
 const locmap = {
-  'zh_CN':'Chinese (China)',
-  'en':'English',
-  'fr':'French',
+  'am':'Amharic',
+  'ar':'Arabic',
+  'bg':'Bulgarian',
+  'bn':'Bangla',
+  'ca':'Catalan',
+  'cs':'Czech',
+  'da':'Danish',
   'de':'German',
+  'el':'Greek',
+  'en':'English',
+  'en_AU':'English (Australia)',
+  'en_GB':'English (United Kingdom)',
+  'en_US':'English (United States)',
+  'es':'Spanish',
+  'es_419':'Spanish (Latin America and the Caribbean)',
+  'et':'Estonian',
+  'fa':'Persian',
+  'fi':'Finnish',
+  'fil':'Filipino',
+  'fr':'French',
+  'gu':'Gujarati',
   'he':'Hebrew',
+  'hi':'Hindi',
+  'hr':'Croatian',
   'hu':'Hungarian',
+  'id':'Indonesian',
+  'in':'Indonesian',
+  'it':'Italian',
+  'iw':'Hebrew (Modern)',
+  'ja':'Japanese',
+  'kn':'Kannada',
   'ko':'Korean',
+  'lt':'Lithuanian',
+  'lv':'Latvian',
+  'ml':'Malayalam',
+  'mr':'Marathi',
+  'ms':'Malay',
+  'nl':'Dutch',
+  'no':'Norwegian',
+  'pl':'Polish',
+  'pt_BR':'Portuguese (Brazil)',
   'pt_PT':'Portuguese (Portugal)',
   'ro':'Romanian',
   'ru':'Russian',
-  'es':'Spanish',
-  'uk':'Ukrainian'
+  'sk':'Slovak',
+  'sl':'Slovenian',
+  'sr':'Serbian',
+  'sv':'Swedish',
+  'sw':'Kiswahili',
+  'ta':'Tamil',
+  'te':'Telugu',
+  'th':'Thai',
+  'tr':'Turkish',
+  'uk':'Ukrainian',
+  'vi':'Vietnamese',
+  'zh_CN':'Chinese (China)',
+  'zh_TW':'Chinese (Taiwan)'
 }
 
 //Not required for any case
@@ -43,7 +88,7 @@ let nextIndex = 0
 let ans = ""
 const DESCRIPTION_SELECTOR = 'textarea.form-control'
 const firstSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "Certainly"]
-const lastSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "more questions"]
+const lastSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "more questions", "hope this helps", "further assistance"]
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
