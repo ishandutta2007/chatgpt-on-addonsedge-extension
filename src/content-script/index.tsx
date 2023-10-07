@@ -87,8 +87,8 @@ const revlocmap = {
 let nextIndex = 0
 let ans = ""
 const DESCRIPTION_SELECTOR = 'textarea.form-control'
-const firstSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "Certainly"]
-const lastSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "more questions", "hope this helps", "further assistance"]
+const firstSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "Singularity Labs", "Certainly"]
+const lastSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "Singularity Labs", "more questions", "hope this helps", "further assistance"]
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
