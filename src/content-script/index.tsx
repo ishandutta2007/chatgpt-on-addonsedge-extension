@@ -42,8 +42,8 @@ const revlocmap = {
 let nextIndex = 0
 let ans = ""
 const DESCRIPTION_SELECTOR = 'textarea.form-control'
-const firstSentenceSearchKeywords = ["translation", "translated", "here is the", "here's"]
-const lastSentenceSearchKeywords = ["translation", "translated", "here is the", "here's"]
+const firstSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "Certainly"]
+const lastSentenceSearchKeywords = ["translation", "translated", "translates", "here is the", "here's", "heres the", "Ishan", "more questions"]
 
 function waitForElm(selector) {
   return new Promise((resolve) => {
@@ -153,6 +153,14 @@ const set2RowsDesc = async (appendContainer: HTMLElement, leftpaneindexes:number
               const [firstSentence, lastSentence] = extractFirstAndLastSentence(ans)
               console.log("ans b4=", ans)
               console.log("firstSentence=", firstSentence)
+              if (containsAnyWord(firstSentence, firstSentenceSearchKeywords)) {
+                console.log("Replacing firstSentence=", firstSentence)
+                ans = ans.replace(firstSentence, "")
+              }
+              if (containsAnyWord(firstSentence, firstSentenceSearchKeywords)) {
+                console.log("Replacing firstSentence=", firstSentence)
+                ans = ans.replace(firstSentence, "")
+              }
               if (containsAnyWord(firstSentence, firstSentenceSearchKeywords)) {
                 console.log("Replacing firstSentence=", firstSentence)
                 ans = ans.replace(firstSentence, "")
